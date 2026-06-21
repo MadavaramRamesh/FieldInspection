@@ -1,81 +1,58 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, SafeAreaView, Alert, View } from 'react-native';
-import { useState, useEffect } from 'react';
-import * as FileSystem from 'expo-file-system/legacy';
+import { useEffect } from 'react';
 import CameraComponent from './src/components/CameraView';
 import LabelModal from './src/components/LabelModal';
 import PhotoList from './src/components/PhotoList';
-import { CapturedPhoto } from './src/types/index';
-import { initDB, insertPhoto, deletePhoto, fetchAllPhotos } from './src/db/database';
-
-interface PendingCapture {
-  id: string;
-  uri: string;
-  capturedAt: string;
-}
+import { usePhotoCapture } from './src/hooks/usePhotoCapture';
+import { usePhotoStorage } from './src/hooks/usePhotoStorage';
+import { usePhotoList } from './src/hooks/usePhotoList';
+import { usePhotoModal } from './src/hooks/usePhotoModal';
 
 export default function App() {
-  const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [pendingCapture, setPendingCapture] = useState<PendingCapture | null>(null);
+  const { photos, addPhoto, removePhoto } = usePhotoList();
+  const { pendingCapture, handlePhotoCaptured } = usePhotoCapture();
+  const { modalVisible, openModal, closeModal } = usePhotoModal();
+  const { savePhoto, deletePhoto, error: storageError } = usePhotoStorage();
 
   useEffect(() => {
-    initDB();
-    const persisted = fetchAllPhotos();
-    setPhotos(persisted);
-  }, []);
+    if (pendingCapture) {
+      openModal();
+    }
+  }, [pendingCapture, openModal]);
 
-  const handlePhotoCaptured = (id: string, uri: string, capturedAt: string) => {
-    setPendingCapture({ id, uri, capturedAt });
-    setModalVisible(true);
-  };
+  useEffect(() => {
+    if (storageError) {
+      Alert.alert('Error', storageError.getUserMessage());
+    }
+  }, [storageError]);
 
   const handleSaveLabel = async (label: string) => {
     if (!pendingCapture) return;
 
     try {
-      const photosDir = `${FileSystem.documentDirectory}photos/`;
-      await FileSystem.makeDirectoryAsync(photosDir, { intermediates: true });
-
-      const permanentPath = `${photosDir}${pendingCapture.id}.jpg`;
-      await FileSystem.copyAsync({
-        from: pendingCapture.uri,
-        to: permanentPath,
-      });
-
-      const photo: CapturedPhoto = {
-        id: pendingCapture.id,
-        localPath: permanentPath,
-        capturedAt: pendingCapture.capturedAt,
-        label,
-      };
-
-      insertPhoto(photo);
-      setPhotos([photo, ...photos]);
-      setPendingCapture(null);
-      setModalVisible(false);
+      const saved = await savePhoto(pendingCapture, label);
+      if (saved) {
+        addPhoto(saved);
+        closeModal();
+      }
     } catch (error) {
-      Alert.alert('Error', 'Failed to save photo');
-      console.error(error);
+      console.error('Save error:', error);
     }
   };
 
   const handleDiscardPhoto = () => {
-    setPendingCapture(null);
-    setModalVisible(false);
+    closeModal();
   };
 
-  const handleDeletePhoto = async (id: string) => {
+  const handleDeletePhoto = async (photoId: string) => {
     try {
-      const photo = photos.find(p => p.id === id);
-      if (!photo) return;
-
-      deletePhoto(id);
-      await FileSystem.deleteAsync(photo.localPath, { idempotent: true });
-      setPhotos(photos.filter(p => p.id !== id));
+      const success = await deletePhoto(photoId);
+      if (success) {
+        removePhoto(photoId);
+      }
     } catch (error) {
-      Alert.alert('Error', 'Failed to delete photo');
-      console.error(error);
+      console.error('Delete error:', error);
     }
   };
 

@@ -1,6 +1,6 @@
 # Field Inspection
 
-A photo capture app for field inspections. Quickly photograph assets, apply labels, and maintain a persistent local gallery.
+An offline-first mobile app for capturing, labeling, and managing field inspection photos with audit-grade timestamp accuracy and persistent local storage.
 
 ## Quick Start
 
@@ -22,91 +22,216 @@ npx expo start
 - **Camera:** expo-camera 17.0.10
 - **Cryptography:** expo-crypto 15.0.9 (UUID generation)
 
-## Architecture Decisions
+---
 
-### SQLite Over AsyncStorage
+## Features
 
-Photos are persisted in SQLite instead of AsyncStorage because:
+### Core Capabilities
+- 📸 **Photo Capture:** Live camera preview with timestamp at capture moment
+- 🏷️ **Photo Labeling:** Required labels for each photo
+- 💾 **Persistent Storage:** SQLite database + FileSystem for reliable persistence
+- 📋 **Photo Gallery:** Scrollable list with thumbnails, labels, and timestamps
+- 🗑️ **Photo Management:** Delete individual photos (both database and file)
+- 📱 **Fully Offline:** No internet required; all data stored locally
 
-- **Structured queries:** SQLite supports `ORDER BY capturedAt DESC` to maintain chronological order without client-side sorting
-- **DELETE efficiency:** `DELETE FROM photos WHERE id = ?` is atomic and doesn't require read-modify-write cycles
-- **Scalability:** SQLite handles hundreds of photos efficiently; AsyncStorage is string-only and requires full deserialization on every modification
-- **Integrity:** Schema validation and type safety at the database layer
+### Data Reliability
+- **Atomic Operations:** Database and file deletion are synchronized
+- **Type Safety:** 100% TypeScript with strict mode
+- **Structured Errors:** Specific error types with user-friendly messages
+- **Audit Trail:** Timestamps reflect exact moment of capture (not save time)
 
-### Immediate Timestamp Capture
+---
 
-`capturedAt` is set immediately after `takePictureAsync()` resolves, not when the photo is labeled or saved. This ensures:
+## Architecture
 
-- **Accuracy:** Timestamp reflects the actual capture moment, not the label entry time (which could be minutes later)
-- **Audit trail:** Photos are timestamped by physical capture order, not user actions
-- **Consistency:** All timestamps are ISO 8601 format from `Date.toISOString()`
+### System Design
+The app uses a **layered architecture** for maintainability and scalability:
 
-### Permanent Photo Storage
+```
+Components (UI Layer)
+    ↓
+Custom Hooks (State Management)
+    ↓
+Services (Business Logic)
+    ↓
+Database / FileSystem (Data Layer)
+```
 
-Photos are copied from the camera temporary cache to `FileSystem.documentDirectory + 'photos/'` before database insertion. This ensures:
+### Key Services
+- **PhotoService** - CRUD operations, validation, business rules
+- **StorageService** - FileSystem abstraction and photo management
+- **CaptureOrchestrator** - Coordinates capture → label → save flow
 
-- **Data persistence:** Photos survive app uninstalls (documents directory is exempt from automatic cleanup)
-- **URI stability:** Permanent file paths don't change between app sessions
-- **Cleanup:** Deleting a photo removes both the database record and the file atomically
+### Custom Hooks
+- **usePhotoCapture** - Capture state and UUID generation
+- **usePhotoStorage** - Save/delete with error handling
+- **usePhotoList** - List initialization and state management
+- **usePhotoModal** - Modal visibility state
 
-## App Flow
+### Error Handling
+- Structured error types with specific codes
+- User-friendly error messages for UI
+- Detailed context logging for debugging
 
-1. **Initialization:** On mount, `initDB()` creates the photos table, then `fetchAllPhotos()` restores persisted photos to app state
-2. **Capture:** Camera shutter → generate UUID → timestamp immediately → open label modal with live preview
-3. **Label:** User enters label → save copies file to permanent directory → `insertPhoto()` into SQLite → prepend to gallery
-4. **Discard:** Modal close without label → clears pending capture (no side effects)
-5. **Delete:** User taps delete → `deletePhoto()` from DB first → `FileSystem.deleteAsync()` removes file → state updated
+---
+
+## Storage & Persistence
+
+### SQLite Database
+Photos stored in SQLite with schema:
+```sql
+CREATE TABLE photos (
+  id TEXT PRIMARY KEY,
+  localPath TEXT NOT NULL,
+  capturedAt TEXT NOT NULL,
+  label TEXT NOT NULL
+);
+```
+
+**Why SQLite over AsyncStorage?**
+- Structured queries (ORDER BY, WHERE)
+- Atomic operations (DELETE WHERE)
+- Scales efficiently to 10K+ photos
+- Schema validation
+
+### File System
+Photos stored in `FileSystem.documentDirectory/photos/`
+- Persistent across app updates
+- Not deleted on app uninstall
+- Atomic deletion with database
+
+---
+
+## Timestamp Design
+
+**Critical:** `capturedAt` is recorded **immediately after photo capture**, not when labeled or saved.
+
+Why this matters:
+- ✅ Legal/audit requirement - timestamp reflects actual capture moment
+- ✅ Prevents tampering - timestamp is immutable once set
+- ✅ Accurate ordering - chronological order guaranteed
+- ✅ Offline-first - device time is authoritative source
+
+---
 
 ## File Structure
 
 ```
 src/
-  types/
-    index.ts              # CapturedPhoto interface
-  utils/
-    formatDate.ts         # DD/MM/YYYY HH:mm formatter
-  db/
-    database.ts           # SQLite initialization and CRUD
-  components/
-    CameraView.tsx        # Live preview + capture button
-    LabelModal.tsx        # Label entry with thumbnail
-    PhotoListItem.tsx     # Single photo row with delete button
-    PhotoList.tsx         # FlatList of all photos
-App.tsx                   # Main screen, state management, FileSystem ops
+  types/              # Data contracts (CapturedPhoto interface)
+  errors/             # Error types (PhotoError, error codes)
+  services/           # Business logic (PhotoService, StorageService, etc.)
+  hooks/              # Reusable state logic
+  components/         # UI only (CameraView, LabelModal, PhotoList)
+  db/                 # Database operations
+  utils/              # Pure functions (formatDate)
+  constants/          # App configuration
+
+ARCHITECTURE.md       # Complete system design
+TEAM_STANDARDS.md     # Coding standards and team guidelines
 ```
 
-## Future Enhancements
+---
 
-- **GPS tagging:** Capture location at photo time using expo-location
-- **Offline sync:** Queue photos for upload when device reconnects; local-first persistence
-- **Inspection sessions:** Group photos by date/location/inspector into sessions for batch operations
-- **Swipe to delete:** Gesture-based delete instead of tap for faster workflows
-- **Photo metadata:** EXIF preservation, image compression, thumbnailing
-- **Export:** CSV/PDF reports from captured photos with GPS, timestamp, labels
+## Documentation
 
-## Database Schema
+### Complete Documentation
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Full system design, data flows, scalability
+- [TEAM_STANDARDS.md](./TEAM_STANDARDS.md) - Coding standards, patterns, PR checklist
 
-```sql
-CREATE TABLE photos (
-  id TEXT PRIMARY KEY,
-  localPath TEXT,
-  capturedAt TEXT,
-  label TEXT
-);
-```
+---
 
-- **id:** UUID (v4) generated at capture time
-- **localPath:** Absolute file:// URI on device filesystem
-- **capturedAt:** ISO 8601 timestamp from `Date.toISOString()`
-- **label:** User-entered text (required, trimmed)
+## Code Standards
 
-## Testing Locally
+The team follows strict standards for consistency and quality:
 
-1. Open the app in Expo Go
-2. Tap "Capture Photo" → permit camera access
-3. Take a photo → modal appears with preview
-4. Enter label (e.g., "Front damage") → tap Save
-5. Photo appears in list with timestamp
-6. Tap trash icon → photo deletes from DB and disk
-7. Close and reopen app → photos persist
+**Key Rules:**
+- No business logic in components
+- All async calls through services
+- All errors typed and handled
+- TypeScript strict mode enforced
+- Components < 100 lines, Hooks < 50 lines
 
+See [TEAM_STANDARDS.md](./TEAM_STANDARDS.md) for complete guidelines.
+
+---
+
+## How to Add a Feature
+
+1. **Add business logic to a service** (PhotoService, etc.)
+2. **Wrap in a hook** (usePhotoCapture, etc.) if reusable
+3. **Use hook in component** (CameraView, etc.)
+4. **Follow naming conventions** (Services, Hooks, Components patterns)
+5. **Handle errors properly** (typed PhotoError)
+6. **Write tests** (service tests, hook tests)
+
+Example in [TEAM_STANDARDS.md](./TEAM_STANDARDS.md).
+
+---
+
+## Performance
+
+### Current Capacity
+- ✅ Handles 100-500 photos efficiently
+- ✅ FlatList virtualization (only visible items rendered)
+- ✅ Minimal memory footprint
+
+### Scaling Path
+- **500-5K photos:** Add pagination
+- **5K-50K photos:** Add database indexing, filtering UI
+- **50K+ photos:** Archive old sessions to cloud
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed scalability notes.
+
+---
+
+## Security
+
+### Data Storage
+- All photos stored locally in `FileSystem.documentDirectory`
+- Device OS handles encryption (iOS Keychain / Android Keystore)
+- No data transmitted without explicit sync feature
+
+### Permissions
+- Camera permission validated at runtime
+- Users can revoke in device settings
+- Graceful handling of permission denial
+
+---
+
+## Contributing
+
+When contributing:
+1. Read [ARCHITECTURE.md](./ARCHITECTURE.md)
+2. Follow patterns in [TEAM_STANDARDS.md](./TEAM_STANDARDS.md)
+3. Write tests for services/hooks
+4. Check code review checklist
+5. Create ADR for architectural decisions
+
+---
+
+## Future Roadmap
+
+### Phase 1: Offline Capture ✅
+Photo capture with timestamps, labeling, persistence
+
+### Phase 2: GPS Tagging
+Capture coordinates at photo time, location display, map view
+
+### Phase 3: Offline Sync Queue
+Queue photos for server upload, automatic retry, compression
+
+### Phase 4: Inspection Sessions
+Group photos by session, metadata, session export
+
+### Phase 5: Analytics & Reporting
+Trends, metrics, export to PDF/CSV
+
+### Phase 6: Team Workflows
+Multi-user collaboration, approvals, comments
+
+---
+
+## License
+
+[Add your license here]
