@@ -16,6 +16,18 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
     return <View />;
   }
 
+  const extractCaptureTime = (photo: any): string => {
+    try {
+      if (photo.exif?.DateTime) {
+        const exifDate = new Date(photo.exif.DateTime.replace(/:/g, '-').replace(' ', 'T') + 'Z');
+        return exifDate.toISOString();
+      }
+    } catch (error) {
+      console.warn('Failed to extract EXIF timestamp:', error);
+    }
+    return new Date().toISOString();
+  };
+
   const handleCapture = async () => {
     if (isCapturing || !cameraRef.current) return;
 
@@ -30,7 +42,7 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
     setIsCapturing(true);
     try {
       const photo = await cameraRef.current.takePictureAsync();
-      const capturedAt = new Date().toISOString();
+      const capturedAt = extractCaptureTime(photo);
       const id = Crypto.randomUUID();
       onPhotoCaptured(id, photo.uri, capturedAt);
     } catch (error) {

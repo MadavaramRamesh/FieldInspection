@@ -19,7 +19,7 @@ export function usePhotoCapture(): UsePhotoCaptureReturn {
     try {
       const pending: PendingPhoto = { id, uri, capturedAt };
       setPendingCapture(pending);
-      captureOrchestrator.handlePhotoCapture(uri);
+      captureOrchestrator.handlePhotoCapture(uri, capturedAt, id);
     } finally {
       setIsCapturing(false);
     }

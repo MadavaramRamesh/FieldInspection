@@ -29,11 +29,10 @@ export class CaptureOrchestrator {
     this.flowCallbacks = callbacks;
   }
 
-  async handlePhotoCapture(uri: string): Promise<void> {
-    const id = Crypto.randomUUID();
-    const capturedAt = new Date().toISOString();
+  async handlePhotoCapture(uri: string, capturedAt: string, id?: string): Promise<void> {
+    const photoId = id || Crypto.randomUUID();
 
-    this.pendingPhoto = { id, uri, capturedAt };
+    this.pendingPhoto = { id: photoId, uri, capturedAt };
 
     if (this.flowCallbacks) {
       this.flowCallbacks.onCapture(this.pendingPhoto);
