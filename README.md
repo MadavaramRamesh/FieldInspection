@@ -44,43 +44,64 @@ npx expo start
 
 ## Screenshots
 
-### Camera Capture Screen
+### iOS App Screenshots
+
+The following screenshots showcase the Field Inspection app on iOS with the latest UI improvements:
+
+#### 1. Camera Capture Screen
 ![Camera Capture](docs/screenshots/01-camera-capture.png)
-- Live camera preview with 150px fixed height
-- Capture button centered below preview
-- Real-time photo capture
 
-### Label Modal
+**Features:**
+- Live camera preview occupying top 50% of screen
+- Photo capture button positioned at bottom of camera preview
+- Real-time photo capture with EXIF timestamp extraction
+- Clean, minimal UI with responsive layout
+
+#### 2. Photo Label Modal
 ![Label Modal](docs/screenshots/02-label-modal.png)
+
+**Features:**
 - Photo thumbnail preview (120x120)
-- Required label input field
-- Save and Discard buttons
-- Validation (Save button disabled when empty)
+- Required label input field (validation enforced)
+- Save and Discard buttons for label management
+- Modal prevents accidental photo loss
 
-### Photo Gallery (Single Photo)
+#### 3. Photo Gallery - Single Photo
 ![Photo List](docs/screenshots/03-photo-list.png)
-- First photo saved with label and timestamp
-- Thumbnail (60x60), label, and timestamp visible
-- Delete button (trash icon) on far right
 
-### Photo Gallery (Multiple Photos)
+**Features:**
+- First photo displayed in gallery after labeling
+- Thumbnail (60x60), label, and formatted timestamp visible
+- Delete button (trash icon) on far right
+- Clean list item design
+
+#### 4. Photo Gallery - Multiple Photos
 ![Photo List Multiple](docs/screenshots/04-photo-list.png)
-- Scrollable FlatList with multiple photos
-- Shows app working with many captures
-- Each photo displays thumbnail, unique label, and timestamp
+
+**Features:**
+- Scrollable FlatList with virtualization for performance
+- Multiple photos with unique labels and timestamps
+- Each item shows thumbnail, label, and capture time
 - Delete buttons available for each photo
+- Demonstrates app handling concurrent captures
 
 ---
 
 ## Demo Video
 
-**60-second walkthrough of complete flow:**
+### Android Demo
+**Complete walkthrough on Android:**
 
-[![Watch Demo Video](https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge&logo=github)](https://github.com/user-attachments/assets/0211ef93-4c3a-47a1-b8f2-89c6302e58c8)
+[![Watch Android Demo](https://img.shields.io/badge/Watch-Android%20Demo-green?style=for-the-badge&logo=android)](https://github.com/user-attachments/assets/5367bffc-ed70-4247-83e0-8981d8924e98)
+
+**Features demonstrated:**
+- Camera capture with live preview (top 50% of screen)
+- Photo labeling with required field validation
+- Photo list with thumbnails, labels, and timestamps
+- Photo deletion with database and file sync
+- Offline-first operation with local SQLite storage
 
 [📹 View in Release](https://github.com/MadavaramRamesh/FieldInspection/releases/tag/pre_release)
-
-Shows: Camera capture → Label entry → Save → Photo appears in list → Delete functionality
 
 ---
 
