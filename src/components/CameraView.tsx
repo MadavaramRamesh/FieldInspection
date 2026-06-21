@@ -12,8 +12,22 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isCapturing, setIsCapturing] = useState(false);
 
+  React.useEffect(() => {
+    if (!permission?.granted) {
+      requestPermission();
+    }
+  }, []);
+
   if (!permission) {
-    return <View />;
+    return <View style={styles.container} />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Button title="Allow Camera Access" onPress={requestPermission} />
+      </View>
+    );
   }
 
   const extractCaptureTime = (photo: any): string => {
