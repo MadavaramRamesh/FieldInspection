@@ -4,16 +4,16 @@
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "expo": "~56.0.12",
-    "expo-camera": "~56.0.8",
-    "expo-crypto": "~56.0.4",
-    "expo-file-system": "~56.0.8",
-    "expo-image-picker": "~56.0.18",
-    "expo-media-library": "~56.0.7",
-    "expo-sqlite": "~56.0.5",
-    "expo-status-bar": "~56.0.4",
-    "react": "19.2.3",
-    "react-native": "0.85.3"
+    "expo": "~54.0.12",
+    "expo-camera": "~17.0.10",
+    "expo-crypto": "~15.0.9",
+    "expo-file-system": "~19.0.23",
+    "expo-image-picker": "~17.0.11",
+    "expo-media-library": "~18.2.1",
+    "expo-sqlite": "~16.0.10",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
