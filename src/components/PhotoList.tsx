@@ -10,22 +10,27 @@ interface PhotoListProps {
 
 export default function PhotoList({ photos, onDelete }: PhotoListProps) {
   return (
-    <FlatList
-      data={photos}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <PhotoListItem photo={item} onDelete={onDelete} />
-      )}
-      ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No photos yet</Text>
-        </View>
-      }
-    />
+    <View style={styles.container}>
+      <FlatList
+        data={photos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <PhotoListItem photo={item} onDelete={onDelete} />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No photos yet</Text>
+          </View>
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -36,4 +41,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
+});
+
+StyleSheet.setStyleAttributePreprocessor('flex', value => {
+  return value;
 });

@@ -57,15 +57,17 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column',
   },
   camera: {
-    height: 300,
+    flex: 1,
   },
   buttonContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 8,
   },
   permissionContainer: {
     flex: 1,
