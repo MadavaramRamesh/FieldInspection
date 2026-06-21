@@ -74,12 +74,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   camera: {
-    flex: 1,
+    height: '50%',
+    width: '100%',
   },
   buttonContainer: {
-    justifyContent: 'center',
+    height: '50%',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   permissionContainer: {
     flex: 1,
