@@ -42,6 +42,46 @@ npx expo start
 
 ---
 
+## Screenshots
+
+### Camera Capture Screen
+![Camera Capture](docs/screenshots/01-camera-capture.png)
+- Live camera preview with 150px fixed height
+- Capture button centered below preview
+- Real-time photo capture
+
+### Label Modal
+![Label Modal](docs/screenshots/02-label-modal.png)
+- Photo thumbnail preview (120x120)
+- Required label input field
+- Save and Discard buttons
+- Validation (Save button disabled when empty)
+
+### Photo Gallery (Single Photo)
+![Photo List](docs/screenshots/03-photo-list.png)
+- First photo saved with label and timestamp
+- Thumbnail (60x60), label, and timestamp visible
+- Delete button (trash icon) on far right
+
+### Photo Gallery (Multiple Photos)
+![Photo List Multiple](docs/screenshots/04-photo-list.png)
+- Scrollable FlatList with multiple photos
+- Shows app working with many captures
+- Each photo displays thumbnail, unique label, and timestamp
+- Delete buttons available for each photo
+
+---
+
+## Demo Video
+
+**60-second walkthrough of complete flow:**
+
+[Watch Demo](docs/videos/demo.mp4)
+
+Shows: Camera capture → Label entry → Save → Photo appears in list → Delete functionality
+
+---
+
 ## Architecture
 
 ### System Design
