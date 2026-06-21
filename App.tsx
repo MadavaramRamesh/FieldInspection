@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   cameraContainer: {
-    height: 150,
+    flex: 1,
   },
   listContainer: {
     flex: 1,
