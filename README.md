@@ -76,7 +76,9 @@ npx expo start
 
 **60-second walkthrough of complete flow:**
 
-[Watch Demo](docs/videos/demo.mp4)
+[![Watch Demo Video](https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge&logo=github)](https://github.com/user-attachments/assets/0211ef93-4c3a-47a1-b8f2-89c6302e58c8)
+
+[📹 View in Release](https://github.com/MadavaramRamesh/FieldInspection/releases/tag/pre_release)
 
 Shows: Camera capture → Label entry → Save → Photo appears in list → Delete functionality
 
