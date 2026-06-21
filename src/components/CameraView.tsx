@@ -69,7 +69,7 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} />
+      <CameraView ref={cameraRef} style={styles.camera} facing="back" />
       <View style={styles.buttonContainer}>
         <Button
           title={isCapturing ? 'Capturing...' : 'Capture Photo'}
