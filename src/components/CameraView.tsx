@@ -13,19 +13,23 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
   const [isCapturing, setIsCapturing] = useState(false);
 
   React.useEffect(() => {
-    if (!permission?.granted) {
+    if (permission && !permission.granted) {
       requestPermission();
     }
-  }, []);
+  }, [permission]);
 
   if (!permission) {
-    return <View style={styles.container} />;
+    return (
+      <View style={styles.permissionContainer}>
+        <Button title="Initializing camera..." onPress={() => {}} disabled />
+      </View>
+    );
   }
 
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Button title="Allow Camera Access" onPress={requestPermission} />
+        <Button title="Grant Camera Permission" onPress={() => requestPermission()} />
       </View>
     );
   }
@@ -55,13 +59,21 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
 
     setIsCapturing(true);
     try {
+      console.log('Starting photo capture...');
       const photo = await cameraRef.current.takePictureAsync();
+      console.log('Photo captured:', photo.uri);
+
+      if (!photo || !photo.uri) {
+        throw new Error('Photo capture returned invalid data');
+      }
+
       const capturedAt = extractCaptureTime(photo);
       const id = Crypto.randomUUID();
+      console.log('Calling onPhotoCaptured with:', { id, uri: photo.uri, capturedAt });
       onPhotoCaptured(id, photo.uri, capturedAt);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to capture photo');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Capture error details:', error);
+      Alert.alert('Capture Failed', `${error?.message || 'Failed to capture photo'}`);
     } finally {
       setIsCapturing(false);
     }
@@ -69,13 +81,16 @@ export default function CameraComponent({ onPhotoCaptured }: CameraViewProps) {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} facing="back" />
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isCapturing ? 'Capturing...' : 'Capture Photo'}
-          onPress={handleCapture}
-          disabled={isCapturing}
-        />
+      <View style={styles.cameraWrapper}>
+        <CameraView ref={cameraRef} style={styles.camera} facing="back" />
+        <View style={styles.buttonContainer}>
+          <Button
+            title={isCapturing ? '⏳ Capturing...' : '📸 Capture Photo'}
+            onPress={handleCapture}
+            disabled={isCapturing}
+            color="#007AFF"
+          />
+        </View>
       </View>
     </View>
   );
@@ -86,16 +101,25 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     flexDirection: 'column',
+    backgroundColor: '#f5f5f5',
+  },
+  cameraWrapper: {
+    height: '100%',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
   camera: {
-    height: '50%',
+    flex: 1,
     width: '100%',
   },
   buttonContainer: {
-    height: '50%',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    width: '100%',
   },
   permissionContainer: {
     flex: 1,

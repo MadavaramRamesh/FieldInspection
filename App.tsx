@@ -80,13 +80,17 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f8f8',
     flexDirection: 'column',
   },
   cameraContainer: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   listContainer: {
     flex: 1,
+    backgroundColor: '#f8f8f8',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
 });

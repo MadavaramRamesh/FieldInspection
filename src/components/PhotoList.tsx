@@ -30,6 +30,9 @@ export default function PhotoList({ photos, onDelete }: PhotoListProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   emptyContainer: {
     flex: 1,
@@ -40,9 +43,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: '#999',
+    fontWeight: '500',
   },
-});
-
-StyleSheet.setStyleAttributePreprocessor('flex', value => {
-  return value;
 });

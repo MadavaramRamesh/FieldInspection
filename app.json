@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FieldInspection",
+    "name": "Field Inspection",
     "slug": "FieldInspection",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,7 +22,16 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ]
+    ],
+    "permissions": [
+      "CAMERA"
     ]
   }
 }
